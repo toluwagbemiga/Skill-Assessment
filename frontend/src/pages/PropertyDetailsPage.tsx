@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import SimpleFooter from '../components/common/SimpleFooter';
@@ -10,6 +10,8 @@ import PropertyAbout from '../components/property-details/PropertyAbout';
 import PropertyAmenities from '../components/property-details/PropertyAmenities';
 import PropertyLocation from '../components/property-details/PropertyLocation';
 import ScheduleViewingCard from '../components/property-details/ScheduleViewingCard';
+// Pulls in ethers (~180 kB), so keep it out of the initial page chunk.
+const BlockchainCard = lazy(() => import('../components/property-details/BlockchainCard'));
 import { propertiesAPI } from '../services/api';
 import { useSEO } from '../hooks/useSEO';
 import StructuredData from '../components/common/StructuredData';
@@ -202,6 +204,16 @@ const PropertyDetailsPage: React.FC = () => {
               <ScheduleViewingCard
                 property={{ name: property.title, id: property._id }}
               />
+
+              {/* On-chain registry status + "Register on Blockchain" action */}
+              <Suspense fallback={null}>
+                <BlockchainCard
+                  dbId={property._id}
+                  title={property.title}
+                  location={property.location}
+                  price={property.price}
+                />
+              </Suspense>
             </div>
           </div>
         </div>
