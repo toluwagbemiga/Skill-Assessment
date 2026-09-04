@@ -1,0 +1,21 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    environment:
+      # The backend reaches Mongo by Compose service name, not localhost.
+      MONGO_URI: mongodb://mongo:27017/rechain
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    # Deliberately not published to the host: only the app container needs it.
+
+volumes:
+  mongo-data:
