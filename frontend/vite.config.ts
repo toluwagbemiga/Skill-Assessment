@@ -18,7 +18,10 @@ function validateEnvironment() {
     isValid: missing.length === 0,
     missing,
     mode: process.env.NODE_ENV || 'development',
-    apiUrl: process.env.VITE_API_URL || 'http://localhost:4000',
+    // 127.0.0.1, not localhost. server.js binds 0.0.0.0, which is IPv4 only, while
+    // Node 18+ resolves "localhost" to ::1 (IPv6) first — so a localhost target
+    // gets ECONNREFUSED and the proxied request never reaches the backend at all.
+    apiUrl: process.env.VITE_API_URL || 'http://127.0.0.1:4000',
   }
 }
 
@@ -118,6 +121,18 @@ const SERVER_CONFIG = {
       target: env.apiUrl,
       changeOrigin: true,
       secure: false,
+      // Without this, a proxy failure is silent: the browser sees a pending
+      // request and the backend logs nothing, because the request never arrived.
+      configure: (proxy: any) => {
+        proxy.on('error', (err: any, req: any) => {
+          console.error(
+            `[proxy] ${req?.method} ${req?.url} -> ${env.apiUrl} FAILED: ${err?.code || err?.message}`
+          )
+        })
+        proxy.on('proxyRes', (proxyRes: any, req: any) => {
+          console.log(`[proxy] ${req?.method} ${req?.url} -> ${proxyRes?.statusCode}`)
+        })
+      },
     },
   },
 }
