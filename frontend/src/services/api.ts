@@ -1,9 +1,17 @@
 import axios from 'axios';
 
-// API Base URL - uses env variable or falls back to localhost
+// API Base URL.
+//
+// Default is the relative path '/api', which the Vite dev server proxies to the
+// backend (see vite.config.ts). Keeping it same-origin means no CORS preflight,
+// and it works unchanged in a container or Codespace where 'localhost' from the
+// browser's point of view is a different machine entirely.
+//
+// Set VITE_API_BASE_URL only to point at a backend on another origin, e.g. a
+// deployed API in production.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
   ? `${import.meta.env.VITE_API_BASE_URL}/api`
-  : 'http://localhost:4000/api';
+  : '/api';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -53,7 +61,7 @@ export const userAPI = {
       password: data.password,
     }),
 
-  login: (data: { email: string; password: string }) =>
+  login: (data: { email: string; password: string; rememberMe?: boolean }) =>
     apiClient.post('/users/login', data),
 
   forgotPassword: (email: string) =>

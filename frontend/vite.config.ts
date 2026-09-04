@@ -107,11 +107,17 @@ const SERVER_CONFIG = {
     timeout: 30000,
   },
   proxy: {
+    // The backend mounts its routers at /api/* (see server.js), so the prefix must
+    // be preserved. The previous rewrite stripped it, turning /api/products/list
+    // into /products/list, which the backend does not serve.
+    //
+    // Routing through this proxy keeps the browser talking to a single origin, so
+    // there is no CORS preflight and no second forwarded port to make public —
+    // which is what makes the app work unchanged inside GitHub Codespaces.
     '/api': {
       target: env.apiUrl,
       changeOrigin: true,
       secure: false,
-      rewrite: (path) => path.replace(/^\/api/, ''),
     },
   },
 }

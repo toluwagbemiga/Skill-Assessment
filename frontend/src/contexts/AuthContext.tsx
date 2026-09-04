@@ -7,13 +7,24 @@ interface User {
   email: string;
 }
 
+/** Registration succeeds without a session when the account still needs email verification. */
+export interface RegisterResult {
+  requiresVerification: boolean;
+  message?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
-  register: (fullName: string, email: string, phone: string, password: string) => Promise<void>;
+  register: (
+    fullName: string,
+    email: string,
+    phone: string,
+    password: string
+  ) => Promise<RegisterResult>;
   logout: () => void;
 }
 
@@ -54,14 +65,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = useCallback(async (fullName: string, email: string, phone: string, password: string) => {
     const { data } = await userAPI.register({ fullName, email, phone, password });
-    if (data.success && data.token) {
-      localStorage.setItem('REChain_token', data.token);
-      localStorage.setItem('REChain_user', JSON.stringify(data.user));
-      setToken(data.token);
-      setUser(data.user);
-    } else {
+
+    if (!data.success) {
       throw new Error(data.message || 'Registration failed');
     }
+
+    // The backend deliberately withholds a token until the email is verified, and
+    // answers with { success: true, requiresVerification: true }. Requiring a token
+    // here treated that successful response as a failure and surfaced the success
+    // message to the user as an error.
+    if (data.requiresVerification || !data.token) {
+      return { requiresVerification: true, message: data.message };
+    }
+
+    localStorage.setItem('REChain_token', data.token);
+    localStorage.setItem('REChain_user', JSON.stringify(data.user));
+    setToken(data.token);
+    setUser(data.user);
+
+    return { requiresVerification: false, message: data.message };
   }, []);
 
   const logout = useCallback(() => {

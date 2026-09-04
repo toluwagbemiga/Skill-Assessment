@@ -8,12 +8,22 @@ const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const handleSignUp = async (formData: any) => {
     try {
       setError(null);
+      setNotice(null);
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      await register(fullName, formData.email, '', formData.password);
+      const result = await register(fullName, formData.email, '', formData.password);
+
+      // No session is issued until the email is verified, so there is nothing to
+      // navigate into — tell the user to check their inbox instead.
+      if (result.requiresVerification) {
+        setNotice(result.message || 'Check your email to verify your account before signing in.');
+        return;
+      }
+
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
@@ -42,6 +52,13 @@ const SignUpPage: React.FC = () => {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
               <p className="font-manrope text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          {notice && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 flex items-start gap-2">
+              <span className="material-icons text-base text-green-600 leading-5">mark_email_unread</span>
+              <p className="font-manrope text-sm text-green-700">{notice}</p>
             </div>
           )}
 
