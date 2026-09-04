@@ -29,7 +29,11 @@ const createTransporter = () => {
             'api-key': process.env.BREVO_API_KEY,
             'accept': 'application/json',
             'content-type': 'application/json'
-          }
+          },
+          // Without this, an unresponsive Brevo hangs the request that triggered the
+          // email — registration, password reset — with no upper bound. Callers treat
+          // a failed send as non-fatal, so failing fast is strictly better than waiting.
+          timeout: 10000
         });
 
         console.log('✅ Email sent successfully via REST API:', response.data.messageId);
