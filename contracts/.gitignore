@@ -1,0 +1,12 @@
+node_modules
+.env
+cache
+artifacts
+coverage
+coverage.json
+typechain-types
+
+# Local/ephemeral deployment records — only testnet/mainnet records are worth committing
+deployments/localhost.json
+deployments/hardhat.json
+coverage-run.log

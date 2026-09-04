@@ -1,0 +1,9 @@
+{
+  "contract": "PropertyRegistry",
+  "network": "amoy",
+  "chainId": 80002,
+  "address": "0x83d8180680593a7770557C1fa5BBea95A3D6a353",
+  "txHash": "0x29b2461fc664a759e6da9b04fa7e7acbf3c983b8f1f9e0331eb37cf1414af01c",
+  "blockNumber": 46710646,
+  "deployedAt": "2026-09-04T13:38:25.892Z"
+}
