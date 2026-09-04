@@ -9,9 +9,22 @@ import axios from 'axios';
 //
 // Set VITE_API_BASE_URL only to point at a backend on another origin, e.g. a
 // deployed API in production.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-  ? `${import.meta.env.VITE_API_BASE_URL}/api`
-  : '/api';
+// Trailing slashes are stripped: a value like "https://host/" would otherwise
+// produce "https://host//api", and a double slash is a different path to most
+// gateways and proxies.
+const configuredBase = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/+$/, '');
+
+const API_BASE_URL = configuredBase ? `${configuredBase}/api` : '/api';
+
+if (import.meta.env.DEV) {
+  // Makes the "why is my request going there?" question answerable in one glance.
+  console.info(
+    `[api] baseURL = ${API_BASE_URL}` +
+      (configuredBase
+        ? '  (from VITE_API_BASE_URL — unset it to use the same-origin Vite proxy)'
+        : '  (same-origin, proxied by Vite)')
+  );
+}
 
 // Create axios instance
 const apiClient = axios.create({
