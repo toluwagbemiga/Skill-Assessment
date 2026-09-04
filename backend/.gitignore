@@ -62,3 +62,8 @@ coverage/
 # Storybook files
 out/
 .storybook-out/
+
+# Environment files — never commit real credentials
+.env
+.env.*
+!.env.example
