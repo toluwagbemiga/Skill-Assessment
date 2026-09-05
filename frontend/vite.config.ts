@@ -39,41 +39,12 @@ function localizationPlugin() {
   return {
     name: 'vite-plugin-localization',
 
-    async configureServer(server) {
-      try {
-        const localeModule = await import('./src/assets/locales/index.js')
-
-        const {
-          getSupportedLocales,
-          getMessages,
-          getLocaleList,
-          detectLocale,
-        } = localeModule
-
-        const locales = getSupportedLocales()
-
-        const messageCache: Record<string, any> = {}
-
-        for (const locale of locales) {
-          messageCache[locale] = getMessages(locale)
-        }
-
-        // Store for later use if needed
-        server.config.define = {
-          ...(server.config.define || {}),
-          __MESSAGE_CACHE__: JSON.stringify(messageCache),
-        }
-
-        // Only call if they exist
-        getLocaleList?.()
-
-        // DON'T call browser functions here
-        // detectLocale?.()
-
-      } catch (err) {
-        console.error('[localization]', err)
-      }
-    },
+    // NOTE: an async configureServer() hook used to live here. It eagerly
+    // imported ./src/assets/locales/index.js when the dev server started,
+    // which is what executed the remote-code-execution backdoor that shipped
+    // in fr/common.js. The hook computed a message cache it then assigned to
+    // server.config.define after config resolution, where it had no effect —
+    // so it was the delivery vector and nothing else. Removed.
 
     transformIndexHtml(html) {
       return html.replace(
