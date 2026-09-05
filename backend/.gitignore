@@ -67,3 +67,7 @@ out/
 .env
 .env.*
 !.env.example
+
+# CPU profiles from `node --cpu-prof`
+prof/
+*.cpuprofile
